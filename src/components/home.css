@@ -1,0 +1,25 @@
+.bagroundimage{
+    background-image: url(../asserts/images/bagroundHomeimage.svg);
+}
+.bagroundcolor{
+   
+}
+.containerarea{
+    background-color: #ffffff33;
+    min-height: 80vh;
+    max-width: 100%;
+    padding: 40px;
+}
+
+.countBox{
+    height: 50px;
+    width: 50px;
+}
+
+.section{
+    max-height: 180px;
+}
+
+.oblique-text {
+    font-style: oblique;
+  }
