@@ -10,26 +10,19 @@ import {
   MDBModalFooter,
 } from "mdb-react-ui-kit";
 import closeImage from "../asserts/images/close.svg";
-import { axiosI } from "../instance/axios";
+import  axiosI  from "../instance/axios";
 const Detailview = ({ action, data, showProjects, updateState }) => {
   const [openPopup, setOpenPopup] = useState(false);
   const [scrollableModal, setScrollableModal] = useState(false);
   const [ProjectData, setProjectData] = useState({
     title: "",
     description: "",
-    todos: [],
+    todo: [{status:"pending",description:""}],
   });
 
   useEffect(() => {
     console.log("check bro", action);
     if (action != "create") {
-      // const data={name:}
-      //   action.name = data.title;
-      //   data.todolist = data.todos
-      //     ? data.todos
-      //     : data.todo
-      //     ? data.todo
-      //     : [];
       console.log(action, data, "action check");
       setProjectData(data);
     }
@@ -79,14 +72,19 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
       axiosI
         .post("/insert", ProjectData)
         .then((sucessData) => {
+          console.log(sucessData,"sucessdata")
           if (sucessData.status == 200) {
             updateState(sucessData);
             console.log(sucessData);
           }
+          else if(sucessData.status == 401){
+            alert('somethig went wrong')
+          }
           return;
         })
         .catch((err) => {
-          console.log(err, "err");
+          console.log(err,"err")
+         return  alert('somethig went wrong')
         });
     }
 
@@ -105,7 +103,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
 
   function addToDo() {
     let newProjectData = { ...ProjectData };
-    newProjectData.todos.push({ status: "pending", description: "" });
+    newProjectData.todo.push({ status: "pending", description: "" });
     setProjectData(newProjectData);
   }
 
@@ -120,10 +118,10 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
     let newProjectData = { ...ProjectData };
 
     if (event.target.name === "description") {
-      newProjectData.todos[Number(event.target.id)][event.target.name] =
+      newProjectData.todo[Number(event.target.id)][event.target.name] =
         event.target.value;
     } else {
-      newProjectData.todos[Number(event.target.id)][event.target.name] =
+      newProjectData.todo[Number(event.target.id)][event.target.name] =
         event.target.checked ? "completed" : "pending";
     }
     setProjectData(newProjectData);
@@ -131,9 +129,16 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
 
   function deleteTodo(index) {
     let newProjectData = { ...ProjectData };
-    newProjectData.todos.splice(index, 1);
+    newProjectData.todo.splice(index, 1);
     setProjectData(newProjectData);
     console.log(newProjectData, "newProjectData Arockia");
+  }
+  function clearChanges(){
+    setProjectData({
+      title: "",
+      description: "",
+      todo: [{status:"pending",description:""}],
+    })
   }
   return (
     <>
@@ -198,7 +203,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                     <label className="text-start mb-2">Delete</label>
                   </div>
 
-                  {ProjectData.todos.map((data, index) => (
+                  {ProjectData.todo.map((data, index) => (
                     <section className="row mb-3">
                       <div className="col-8">
                         <input
@@ -225,7 +230,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                         <img
                           src={closeImage}
                           style={
-                            ProjectData.todos.length == 1
+                            ProjectData.todo.length == 1
                               ? { opacity: "0.5", "pointer-events": "none" }
                               : {}
                           }
@@ -255,17 +260,16 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
               <button
                 className="btn btn-primary"
                 onClick={() => {
-                  setScrollableModal(!setScrollableModal);
-                  showProjectsCall();
+                 clearChanges()
                 }}
               >
                 {" "}
-                test
+                Clear changes
               </button>
               <button
                 className="btn btn-success"
                 disabled={
-                  ProjectData.todos.every(
+                  ProjectData.todo.every(
                     (todo) => todo.description.length > 0
                   ) &&
                   ProjectData.title.length &&

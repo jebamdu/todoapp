@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import  axiosI  from "../instance/axios";
 import "../components/home.css";
 import Detailview from "./detailView";
 import Navbar from "./Navbar";
@@ -60,25 +61,33 @@ const Home = () => {
     if(!jwdAuth){
       return navigate('/')
     }
+
+    axiosI.post('/allprojects').then((data)=>{
+      const finalList = data.data.projects.map((v) => {
+        const todos = v?.todo?.map((todoid) => {
+          return data.data.todos.find((v) => v._id == todoid);
+        });
+        return {
+          id: v._id,
+          title: v.title,
+          description: v.description,
+          totaltask: v?.todo?.length,
+          todos,
+          completed: todos?.filter((v) => v?.status !== "pending").length,
+        };
+      });
+      console.log(finalList);
+      setproject(finalList);
+    }).catch((e)=>{
+      console.log(e,"error")
+      alert('something went wrong')
+    })
+
     fetch("http://localhost:3000/allprojects")
       .then((d) => d.json())
       .then((d) => {
         console.log(d);
-        const finalList = d.projects.map((v) => {
-          const todos = v?.todo?.map((todoid) => {
-            return d.todos.find((v) => v._id == todoid);
-          });
-          return {
-            id: v._id,
-            title: v.title,
-            description: v.description,
-            totaltask: v?.todo?.length,
-            todos,
-            completed: todos?.filter((v) => v?.status !== "pending").length,
-          };
-        });
-        console.log(finalList);
-        setproject(finalList);
+
       })
       .catch((err) => {
         console.error(err);

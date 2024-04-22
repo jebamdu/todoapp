@@ -3,7 +3,7 @@ import loginimage from "./asserts/images/loginImg.svg";
 import { useNavigate } from 'react-router-dom';
 import "./App.css";
 // import { navigate } from '@reach/router';
-import { axiosI } from "./instance/axios";
+import axiosI  from "./instance/axios";
 const Login = () => {
   const navigate = useNavigate();
   const [loginCredentials, setloginCredentials] = useState({
@@ -34,11 +34,11 @@ const Login = () => {
         }else{
           console.log(data.data)
           localStorage.setItem('jwdAuth',JSON.stringify({token:data.data.token,username:loginCredentials.username}))
-          navigate('/home')
+          return navigate('/home')
         }
       }).catch((e)=>{
         console.log(e)
-        if(e.response.status == 401){
+        if(e.response && e.response.status && e.response.status == 401){
           credInvalidFlag.current = 1;
          return alert('invalid credentials')
         }
