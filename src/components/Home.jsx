@@ -12,48 +12,6 @@ const Home = () => {
     action: "create",
     data: {},
   });
-  // let projectlist = [
-  //   {
-  //     id: 11,
-  //     name: "Angular",
-  //     description:
-  //       " Angular is a development platform, built on TypeScript. As a platform, Angular includes: A component-based framework for building scalable web applications.",
-  //     completed: 2,
-  //     totaltask: 5,
-  //   },
-  //   {
-  //     id: 22,
-  //     name: "React",
-  //     description:
-  //       " Angular is a development platform, built on TypeScript. As a platform, Angular includes: A component-based framework for building scalable web applications.",
-  //     completed: 2,
-  //     totaltask: 5,
-  //   },
-  //   {
-  //     id: 33,
-  //     name: "Nest",
-  //     description:
-  //       " Angular is a development platform, built on TypeScript. As a platform, Angular includes: A component-based framework for building scalable web applications.",
-  //     completed: 2,
-  //     totaltask: 5,
-  //   },
-  //   {
-  //     id: 44,
-  //     name: "Next",
-  //     description:
-  //       " Angular is a development platform, built on TypeScript. As a platform, Angular includes: A component-based framework for building scalable web applications.",
-  //     completed: 2,
-  //     totaltask: 5,
-  //   },
-  //   {
-  //     id: 55,
-  //     name: "Node",
-  //     description:
-  //       " Angular is a development platform, built on TypeScript. As a platform, Angular includes: A component-based framework for building scalable web applications.",
-  //     completed: 2,
-  //     totaltask: 5,
-  //   },
-  // ];
   useEffect(() => {
 
     let jwdAuth = JSON.parse(localStorage.getItem('jwdAuth'))
@@ -64,16 +22,16 @@ const Home = () => {
 
     axiosI.post('/allprojects').then((data)=>{
       const finalList = data.data.projects.map((v) => {
-        const todos = v?.todo?.map((todoid) => {
+        const todo = v?.todo?.map((todoid) => {
           return data.data.todos.find((v) => v._id == todoid);
         });
         return {
-          id: v._id,
+          _id: v._id,
           title: v.title,
           description: v.description,
           totaltask: v?.todo?.length,
-          todos,
-          completed: todos?.filter((v) => v?.status !== "pending").length,
+          todo,
+          completed: todo?.filter((v) => v?.status !== "pending").length,
         };
       });
       console.log(finalList);
@@ -82,17 +40,6 @@ const Home = () => {
       console.log(e,"error")
       alert('something went wrong')
     })
-
-    fetch("http://localhost:3000/allprojects")
-      .then((d) => d.json())
-      .then((d) => {
-        console.log(d);
-
-      })
-      .catch((err) => {
-        console.error(err);
-      });
-    // setproject(projectlist);
   }, []);
 
   function createProject() {
@@ -100,24 +47,39 @@ const Home = () => {
   }
 
   function updatePojectState(projectData) {
-    console.log(projectData, "projectDatta..");
     let newproject = [...project];
-    const newData = {
-      id: projectData.data._id,
-      title: projectData.data.title,
-      description: projectData.data.description,
-      totaltask: projectData.data?.todo?.length,
-      todo: projectData.data?.todo,
-      completed: projectData.data.todo?.filter((v) => v.status !== "pending")
-        .length,
-    };
-    newproject.unshift(newData);
+    console.log(projectData,"projectData...")
+     let index = project.findIndex((id)=>(id._id == projectData.data._id ))
+
+     if(index != -1){
+      const newData = {
+        _id: projectData.data._id,
+        title: projectData.data.title,
+        description: projectData.data.description,
+        totaltask: projectData.data?.todo?.length,
+        todo: projectData.data?.todo,
+        completed: projectData.data.todo?.filter((v) => v.status !== "pending")
+          .length,
+      };
+      newproject[index] = newData
+     }else{
+      const newData = {
+        _id: projectData.data._id,
+        title: projectData.data.title,
+        description: projectData.data.description,
+        totaltask: projectData.data?.todo?.length,
+        todo: projectData.data?.todo,
+        completed: projectData.data.todo?.filter((v) => v.status !== "pending")
+          .length,
+      };
+      newproject.unshift(newData);
+     }
     setproject(newproject);
     setprojectDetailViewFlag({ flag: false, action: "create" });
   }
 
   function openDetailedProjectView(action, data) {
-    console.log("check....");
+    console.log("check....",data,action);
     if (action == "create") {
       setprojectDetailViewFlag({ flag: true, action, data: {} });
     } else {
@@ -129,13 +91,29 @@ const Home = () => {
     setprojectDetailViewFlag({ flag: false, action: "create" });
     console.log("sucesss");
   };
+
+  function sentRequiredParams(data,action){
+    if(action == 'create'){
+      return {
+      title: '',
+      description: '',
+      todo: [{status:'',description:''}],
+      }
+    }
+    return {
+      _id: data._id ? data._id : '' ,
+      title: data.title,
+      description: data.description,
+      todo: data.todo,
+    }
+  }
   return (
     <>
       <Navbar />
       {projectDetailViewFlag.flag && (
         <Detailview
           action={projectDetailViewFlag.action}
-          data={projectDetailViewFlag.data || {}}
+          data={sentRequiredParams(projectDetailViewFlag.data,projectDetailViewFlag.action) || {}}
           showProjects={showProjects}
           updateState={updatePojectState}
         />
@@ -157,7 +135,7 @@ const Home = () => {
         <div className="containerarea row d-flex justify-content-center">
           {project.map((data, index) => (
             <section
-              key={data.id}
+              key={data._id}
               className="col-5 section mb-4 p-2 mx-3 border border-succes rounded"
             >
               <div

@@ -14,6 +14,8 @@ import  axiosI  from "../instance/axios";
 const Detailview = ({ action, data, showProjects, updateState }) => {
   const [openPopup, setOpenPopup] = useState(false);
   const [scrollableModal, setScrollableModal] = useState(false);
+  const [resetProject, setresetProject] = useState({});
+  const [deletepopup, setdeletepopup] = useState({status : false , index: 0});
   const [ProjectData, setProjectData] = useState({
     title: "",
     description: "",
@@ -21,9 +23,9 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
   });
 
   useEffect(() => {
-    console.log("check bro", action);
     if (action != "create") {
-      console.log(action, data, "action check");
+      let newdata = {...data}
+      setresetProject(newdata)
       setProjectData(data);
     }
     setOpenPopup(true);
@@ -34,39 +36,23 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
     showProjects();
   }
 
-  // function addTodoList(){
-  //     setProjectData(...scrollableModal,{status:"",Description:""})
-
-  // }
   function check() {
-    // event.preventDefault();
-
     if (ProjectData._id) {
+      console.log(ProjectData,"ProjectData")
       axiosI
         .post("/update", ProjectData)
         .then((sucessData) => {
+          console.log(sucessData.status,"sucessData")
           if (sucessData.status == 200) {
-            const finalList = sucessData.data.projects.map((v) => {
-              const todos = v?.todo?.map((todoid) => {
-                return sucessData.data.todos.find((v) => v._id == todoid);
-              });
-              return {
-                id: v._id,
-                title: v.title,
-                description: v.description,
-                totaltask: v?.todo?.length,
-                todos,
-                completed: todos?.filter((v) => v.status !== "pending").length,
-              };
-            });
-            // updateTotalProjectRerender(finalList)
-            console.log(sucessData);
+           updateState(sucessData);
+           setScrollableModal(false);
+            return
           } else {
-            return;
+            return alert('sommething went erong');
           }
-        })
-        .catch((err) => {
-          console.log(err, "err");
+        }).catch((err) => {
+          console.log(err,"error....")
+         return alert('sommething went erong')
         });
     } else {
       axiosI
@@ -128,10 +114,13 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
   }
 
   function deleteTodo(index) {
-    let newProjectData = { ...ProjectData };
-    newProjectData.todo.splice(index, 1);
-    setProjectData(newProjectData);
-    console.log(newProjectData, "newProjectData Arockia");
+    if(ProjectData._id){
+      setdeletepopup({status : true , index: index})
+    }else{
+      let newProjectData = { ...ProjectData };
+      newProjectData.todo.splice(index, 1);
+      setProjectData(newProjectData);
+    }
   }
   function clearChanges(){
     setProjectData({
@@ -140,8 +129,31 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
       todo: [{status:"pending",description:""}],
     })
   }
+  function hitdeleteRequest(index){
+
+    let id = ProjectData.todo[index]._id
+    axiosI
+    .post("/delete", {
+      projectId:ProjectData._id,
+      todolistId:id
+    })
+    .then((sucessData) => {
+      console.log(sucessData.status,"sucessData",sucessData.status == 200 && sucessData.data=='sucess')
+      if (sucessData.status == 200 && sucessData.data=='sucess') {
+        let newProjectData = { ...ProjectData };
+      newProjectData.todo.splice(index, 1);
+      setProjectData(newProjectData);
+         setdeletepopup({status : false , index: 0})
+         return 
+      }
+    }).catch((err) => {
+      console.log(err,"error....")
+     return alert('sommething went erong')
+    });
+  }
   return (
     <>
+ 
       <MDBModal
         open={scrollableModal}
         onClose={() => {
@@ -153,7 +165,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
         <MDBModalDialog scrollable>
           <MDBModalContent>
             <MDBModalHeader>
-              <MDBModalTitle>Modal title</MDBModalTitle>
+              <MDBModalTitle>Project Details</MDBModalTitle>
               <MDBBtn
                 className="btn-close"
                 color="none"
@@ -204,7 +216,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                   </div>
 
                   {ProjectData.todo.map((data, index) => (
-                    <section className="row mb-3">
+                    <section className="row mb-3" >
                       <div className="col-8">
                         <input
                           type="text"
@@ -240,6 +252,22 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                           alt=""
                         />
                       </div>
+
+                      {deletepopup.status && deletepopup.index == index &&
+                      (
+                        <div className="row mt-3">
+                          <div className="col-8 d-flex justify-content-center align-items-center">
+                            <span className=" text-danger">Are you sure you want to delete ?</span>
+                          </div>
+                          <div className="col-2">
+                            <button className="btn btn-success"  onClick={() => { setdeletepopup({status : false , index: 0}) }}>No</button>
+                           
+                          </div>
+                          <div className="col-2">
+                          <button className="btn btn-danger"  onClick={(e) => {e.preventDefault(); hitdeleteRequest(deletepopup.index)   }}>Yes</button>
+                          </div>
+                        </div>
+                      )}
                     </section>
                   ))}
                 </div>
@@ -257,7 +285,10 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
               </div>
             </MDBModalBody>
             <MDBModalFooter>
-              <button
+              {  ProjectData._id ? (
+                <></>
+              ):(
+                <button 
                 className="btn btn-primary"
                 onClick={() => {
                  clearChanges()
@@ -266,6 +297,8 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                 {" "}
                 Clear changes
               </button>
+              ) }
+            
               <button
                 className="btn btn-success"
                 disabled={
@@ -282,14 +315,15 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                 }}
                 type="submit"
               >
-                {" "}
-                Save changes
+                {ProjectData._id ?'Update':' Save changes'}
+               
               </button>
             </MDBModalFooter>
           </MDBModalContent>
         </MDBModalDialog>
       </MDBModal>
     </>
+
   );
 };
 
