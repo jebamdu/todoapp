@@ -10,7 +10,10 @@
   background: inherit; 
   backdrop-filter: blur(10px); 
 }
-
+.btnwidth{
+  width: 130px !important;
+    margin-right: 10px !important;
+}
 
 .App-logo {
   height: 40vmin;

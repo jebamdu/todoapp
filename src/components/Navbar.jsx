@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({createProject}) => {
    const [isDropdownOpen, setisDropdownOpen] = useState(false);
    const navigate = useNavigate()
    function logout(){
@@ -15,7 +15,8 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
       
-        <a className="navbar-brand" href="#">Home</a>
+        <a className="navbar-brand pe-auto" >Home</a>
+        <a className='ml-3 navbar-brand pe-auto' onClick={()=>{createProject()}}>Create project</a>
       
         <div className="collapse navbar-collapse justify-content-end" id="navbarNavDropdown">
           <ul className="navbar-nav">

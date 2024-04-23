@@ -199,11 +199,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                     value={ProjectData.description}
                   ></textarea>
                 </div>
-                {/* <div class="form-check">
-                <input type="checkbox" class="form-check-input" id="exampleCheck1">
-                <label class="form-check-label" for="exampleCheck1">Check me out</label>
-            </div> */}
-
+               
                 <div className=" row">
                   <div className="col-8 text-start">
                     <label className="text-start mb-2">TodoList</label>
@@ -273,14 +269,14 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                 </div>
               </form>
 
-              <div className="row justify-content-end">
+              <div className="row mw-40 justify-content-end">
                 <button
-                  className="btn btn-primary"
+                  className="btn btn-secondary btnwidth"
                   onClick={() => {
                     addToDo();
                   }}
                 >
-                  Add
+                  Add More
                 </button>
               </div>
             </MDBModalBody>
