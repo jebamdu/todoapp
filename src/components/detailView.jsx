@@ -10,27 +10,26 @@ import {
   MDBModalFooter,
 } from "mdb-react-ui-kit";
 import closeImage from "../asserts/images/close.svg";
-import  axiosI  from "../instance/axios";
+import axiosI from "../instance/axios";
 const Detailview = ({ action, data, showProjects, updateState }) => {
-  const [openPopup, setOpenPopup] = useState(false);
   const [scrollableModal, setScrollableModal] = useState(false);
+  // eslint-disable-next-line no-unused-vars
   const [resetProject, setresetProject] = useState({});
-  const [deletepopup, setdeletepopup] = useState({status : false , index: 0});
+  const [deletepopup, setdeletepopup] = useState({ status: false, index: 0 });
   const [ProjectData, setProjectData] = useState({
     title: "",
     description: "",
-    todo: [{status:"pending",description:""}],
+    todo: [{ status: "pending", description: "" }],
   });
 
   useEffect(() => {
-    if (action != "create") {
-      let newdata = {...data}
+    if (action !== "create") {
+      let newdata = { ...data }
       setresetProject(newdata)
       setProjectData(data);
     }
-    setOpenPopup(true);
     setScrollableModal(true);
-  }, []);
+  }, [action, data]);
 
   function showProjectsCall() {
     showProjects();
@@ -38,39 +37,39 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
 
   function check() {
     if (ProjectData._id) {
-      console.log(ProjectData,"ProjectData")
+      console.log(ProjectData, "ProjectData")
       axiosI
         .post("/update", ProjectData)
         .then((sucessData) => {
-          console.log(sucessData.status,"sucessData")
-          if (sucessData.status == 200) {
-           updateState(sucessData);
-           setScrollableModal(false);
+          console.log(sucessData.status, "sucessData")
+          if (sucessData.status === 200) {
+            updateState(sucessData);
+            setScrollableModal(false);
             return
           } else {
             return alert('sommething went erong');
           }
         }).catch((err) => {
-          console.log(err,"error....")
-         return alert('sommething went erong')
+          console.log(err, "error....")
+          return alert('sommething went erong')
         });
     } else {
       axiosI
         .post("/insert", ProjectData)
         .then((sucessData) => {
-          console.log(sucessData,"sucessdata")
-          if (sucessData.status == 200) {
+          console.log(sucessData, "sucessdata")
+          if (sucessData.status === 200) {
             updateState(sucessData);
             console.log(sucessData);
           }
-          else if(sucessData.status == 401){
+          else if (sucessData.status === 401) {
             alert('somethig went wrong')
           }
           return;
         })
         .catch((err) => {
-          console.log(err,"err")
-         return  alert('somethig went wrong')
+          console.log(err, "err")
+          return alert('somethig went wrong')
         });
     }
 
@@ -114,46 +113,43 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
   }
 
   function deleteTodo(index) {
-    if(ProjectData._id){
-      setdeletepopup({status : true , index: index})
-    }else{
+    if (ProjectData._id) {
+      setdeletepopup({ status: true, index: index })
+    } else {
       let newProjectData = { ...ProjectData };
       newProjectData.todo.splice(index, 1);
       setProjectData(newProjectData);
     }
   }
-  function clearChanges(){
+  function clearChanges() {
     setProjectData({
       title: "",
       description: "",
-      todo: [{status:"pending",description:""}],
+      todo: [{ status: "pending", description: "" }],
     })
   }
-  function hitdeleteRequest(index){
+  function hitdeleteRequest(index) {
 
     let id = ProjectData.todo[index]._id
     axiosI
-    .post("/delete", {
-      projectId:ProjectData._id,
-      todolistId:id
-    })
-    .then((sucessData) => {
-      console.log(sucessData.status,"sucessData",sucessData.status == 200 && sucessData.data=='sucess')
-      if (sucessData.status == 200 && sucessData.data=='sucess') {
+      .post("/delete", {
+        projectId: ProjectData._id,
+        todolistId: id
+      })
+      .then((sucessData) => {
         let newProjectData = { ...ProjectData };
-      newProjectData.todo.splice(index, 1);
-      setProjectData(newProjectData);
-         setdeletepopup({status : false , index: 0})
-         return 
-      }
-    }).catch((err) => {
-      console.log(err,"error....")
-     return alert('sommething went erong')
-    });
+        newProjectData.todo.splice(index, 1);
+        setProjectData(newProjectData);
+        setdeletepopup({ status: false, index: 0 })
+
+      }).catch((err) => {
+        console.log(err, "error....")
+        return alert('sommething went erong')
+      });
   }
   return (
     <>
- 
+
       <MDBModal
         open={scrollableModal}
         onClose={() => {
@@ -177,7 +173,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
             </MDBModalHeader>
             <MDBModalBody>
               <form>
-                <div class="form-group text-start mb-4 mt-3">
+                <div className="form-group text-start mb-4 mt-3">
                   <label className="text-start mb-2">Project Name</label>
                   <input
                     type="text"
@@ -189,7 +185,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                   />
                   <small className="form-text text-muted"></small>
                 </div>
-                <div class="form-group text-start mb-4">
+                <div className="form-group text-start mb-4">
                   <label className="text-start mb-2">Description</label>
                   <textarea
                     className="form-control text-start"
@@ -199,7 +195,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                     value={ProjectData.description}
                   ></textarea>
                 </div>
-               
+
                 <div className=" row">
                   <div className="col-8 text-start">
                     <label className="text-start mb-2">TodoList</label>
@@ -238,7 +234,7 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                         <img
                           src={closeImage}
                           style={
-                            ProjectData.todo.length == 1
+                            ProjectData.todo.length === 1
                               ? { opacity: "0.5", "pointer-events": "none" }
                               : {}
                           }
@@ -249,21 +245,21 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                         />
                       </div>
 
-                      {deletepopup.status && deletepopup.index == index &&
-                      (
-                        <div className="row mt-3">
-                          <div className="col-8 d-flex justify-content-center align-items-center">
-                            <span className=" text-danger">Are you sure you want to delete ?</span>
+                      {deletepopup.status && deletepopup.index === index &&
+                        (
+                          <div className="row mt-3">
+                            <div className="col-8 d-flex justify-content-center align-items-center">
+                              <span className=" text-danger">Are you sure you want to delete ?</span>
+                            </div>
+                            <div className="col-2">
+                              <button className="btn btn-success" onClick={() => { setdeletepopup({ status: false, index: 0 }) }}>No</button>
+
+                            </div>
+                            <div className="col-2">
+                              <button className="btn btn-danger" onClick={(e) => { e.preventDefault(); hitdeleteRequest(deletepopup.index) }}>Yes</button>
+                            </div>
                           </div>
-                          <div className="col-2">
-                            <button className="btn btn-success"  onClick={() => { setdeletepopup({status : false , index: 0}) }}>No</button>
-                           
-                          </div>
-                          <div className="col-2">
-                          <button className="btn btn-danger"  onClick={(e) => {e.preventDefault(); hitdeleteRequest(deletepopup.index)   }}>Yes</button>
-                          </div>
-                        </div>
-                      )}
+                        )}
                     </section>
                   ))}
                 </div>
@@ -281,28 +277,28 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
               </div>
             </MDBModalBody>
             <MDBModalFooter>
-              {  ProjectData._id ? (
+              {ProjectData._id ? (
                 <></>
-              ):(
-                <button 
-                className="btn btn-primary"
-                onClick={() => {
-                 clearChanges()
-                }}
-              >
-                {" "}
-                Clear changes
-              </button>
-              ) }
-            
+              ) : (
+                <button
+                  className="btn btn-primary"
+                  onClick={() => {
+                    clearChanges()
+                  }}
+                >
+                  {" "}
+                  Clear changes
+                </button>
+              )}
+
               <button
                 className="btn btn-success"
                 disabled={
                   ProjectData.todo.every(
                     (todo) => todo.description.length > 0
                   ) &&
-                  ProjectData.title.length &&
-                  ProjectData.description.length
+                    ProjectData.title.length &&
+                    ProjectData.description.length
                     ? false
                     : true
                 }
@@ -311,8 +307,8 @@ const Detailview = ({ action, data, showProjects, updateState }) => {
                 }}
                 type="submit"
               >
-                {ProjectData._id ?'Update':' Save changes'}
-               
+                {ProjectData._id ? 'Update' : ' Save changes'}
+
               </button>
             </MDBModalFooter>
           </MDBModalContent>

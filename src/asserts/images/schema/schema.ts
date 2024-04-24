@@ -1,4 +1,4 @@
-export interface logincred{
+export interface logincred {
     username: string;
     password: string;
 }

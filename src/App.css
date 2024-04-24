@@ -1,18 +1,22 @@
 .App {
   text-align: center;
 }
-.maincontainer{
-  background-image: url('./asserts/images/bgImage.jpg');
 
+.maincontainer {
+  background-image: url('./asserts/images/login.svg');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
 }
-.container {
-  box-shadow: 0 0 5px 0 ; 
-  background: inherit; 
-  backdrop-filter: blur(10px); 
+
+.input {
+  width: 300px !important;
 }
-.btnwidth{
+
+.btnwidth {
   width: 130px !important;
-    margin-right: 10px !important;
+  margin-right: 10px !important;
 }
 
 .App-logo {
@@ -45,12 +49,12 @@
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
 }
 
-
-.color{
+.color {
   color: black;
 }

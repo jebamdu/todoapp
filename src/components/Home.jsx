@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosI from "../instance/axios";
-import { saveAs } from 'file-saver';
 import "../components/home.css";
 import Detailview from "./detailView";
 import Navbar from "./Navbar";
+import ExportView from "./ExportView";
 const Home = () => {
   const navigate = useNavigate();
   const [project, setproject] = useState([]);
@@ -13,6 +13,7 @@ const Home = () => {
     action: "create",
     data: {},
   });
+  const [OpenExportModel, setOpenExportModel] = useState(null);
   useEffect(() => {
     let jwdAuth = JSON.parse(localStorage.getItem("jwdAuth"));
     console.log(jwdAuth, "jwdAuth");
@@ -25,7 +26,7 @@ const Home = () => {
       .then((data) => {
         const finalList = data.data.projects.map((v) => {
           const todo = v?.todo?.map((todoid) => {
-            return data.data.todos.find((v) => v._id == todoid);
+            return data.data.todos.find((v) => v._id === todoid);
           });
           return {
             _id: v._id,
@@ -41,9 +42,13 @@ const Home = () => {
       })
       .catch((e) => {
         console.log(e, "error");
+        if (e?.response?.status === 401) {
+          localStorage.removeItem('jwdAuth')
+          return navigate('/')
+        }
         alert("something went wrong");
       });
-  }, []);
+  }, [navigate]);
 
   function createProject() {
     setprojectDetailViewFlag({ flag: true, action: "create" });
@@ -52,9 +57,9 @@ const Home = () => {
   function updatePojectState(projectData) {
     let newproject = [...project];
     console.log(projectData, "projectData...");
-    let index = project.findIndex((id) => id._id == projectData.data._id);
+    let index = project.findIndex((id) => id._id === projectData.data._id);
 
-    if (index != -1) {
+    if (index !== -1) {
       const newData = {
         _id: projectData.data._id,
         title: projectData.data.title,
@@ -83,7 +88,7 @@ const Home = () => {
 
   function openDetailedProjectView(action, data) {
     console.log("check....", data, action);
-    if (action == "create") {
+    if (action === "create") {
       setprojectDetailViewFlag({ flag: true, action, data: {} });
     } else {
       setprojectDetailViewFlag({ flag: true, action, data });
@@ -96,7 +101,7 @@ const Home = () => {
   };
 
   function sentRequiredParams(data, action) {
-    if (action == "create") {
+    if (action === "create") {
       return {
         title: "",
         description: "",
@@ -111,27 +116,7 @@ const Home = () => {
     };
   }
 
-  function createmdFile(data) {
-    let markdownContent =
-      `## ` +data.title +"\n" +
-      "##### Summary :" +
-      (data.todo.length -
-        data.todo.filter((data) => data.status == "pending").length) +"/" +data.todo.length +" todos completed" + "\n";
-      markdownContent += "#### Pending" + "\n";
-    data.todo
-      .filter((data) => data.status == "pending")
-      .forEach((value) => {
-        markdownContent += `- [ ] ${value.description}\n`;  });
-        markdownContent += "#### Completed" + "\n";
-    data.todo
-      .filter((data) => data.status != "pending")
-      .forEach((value) => {
-        markdownContent += `- [x] ${value.description}\n`;
-      });
 
-    const blob = new Blob([markdownContent], { type: 'text/markdown' });
-    saveAs(blob, data.title+'.md'); // Save the file with name 'example.md'
-  }
 
   document.addEventListener("DOMContentLoaded", function () {
     const items = document.querySelectorAll(".section");
@@ -165,19 +150,28 @@ const Home = () => {
           updateState={updatePojectState}
         />
       )}
+      <ExportView OpenExportModel={OpenExportModel} setOpenExportModel={setOpenExportModel} />
 
-      <div className="home bagroundimage w-100 min-vh-100 d-flex align-items-center justify-content-center">
+      <div className="home bagroundimage w-100 min-vh-100 row d-flex align-items-center  justify-content-center">
+        <div className="w-100 ">
+        <div className="w-75 d-flex justify-content-end ">
+
+        <button className="btn btn-secondary " onClick={createProject}>Create project</button>
+        </div>
+        </div>
         <div className="containerarea row d-flex justify-content-center">
           {project.map((data, index) => (
             <section
               key={data._id}
               className="col-5 section mb-4 p-2 mx-3 border border-succes rounded"
+              style={{position:"relative"}}
             >
               <div className="export">
                 <button
                   onClick={(e) => {
                     e.preventDefault();
-                    createmdFile(data);
+                    // createmdFile();
+                    setOpenExportModel(data)
                   }}
                   className="btn btn-success exportbtn"
                 >
